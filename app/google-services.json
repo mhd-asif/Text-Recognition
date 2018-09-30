@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "910566203686",
+    "firebase_url": "https://dds-project-13612.firebaseio.com",
+    "project_id": "dds-project-13612",
+    "storage_bucket": "dds-project-13612.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:910566203686:android:3de40ab24fd51661",
+        "android_client_info": {
+          "package_name": "com.dds.textrecognition"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "910566203686-8rfmbt3sisuk14hg6le5aupfcqea8jgk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCkjIcLUulni2blcLMnb0mFLrK3lHiiCVg"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

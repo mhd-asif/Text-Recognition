@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">TextRecognition</string>
+    <string name="set_user_dialog_title">Set User ID</string>
+    <string name="set_user_button_cancel">Cancel</string>
+    <string name="set_user_button_set">Set</string>
+    <string name="set_user_button_new">Add New</string>
+</resources>
