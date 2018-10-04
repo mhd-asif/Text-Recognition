@@ -25,6 +25,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -98,17 +99,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     String currentUser;
 
     int max;
-    String userId;
+    String userId, deviceId;
 
     AlertDialog alert;
+    SessionManager session;
+    ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Log.e("Asif", "onCreate() called ...");
 
-        current = 0;
-        currentUser = "";
+        progressBar = findViewById(R.id.progress_bar);
+        session = new SessionManager(this);
+        if (session.isLoggedIn()) {
+            current = session.getLastWordPosition();
+            currentUser = session.getUserName();
+        }
+        else {
+            current = 0;
+            currentUser = "";
+        }
+        deviceId = getUniqueIMEIId();
         service = RetrofitHelper.getRetrofitService();
         firebaseDatabase = FirebaseDatabase.getInstance();
         firebaseStorage = FirebaseStorage.getInstance();
@@ -119,7 +132,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 totalSamples = dataSnapshot.getChildrenCount();
-                Toast.makeText(MainActivity.this, "Total Samples:" + totalSamples, Toast.LENGTH_SHORT).show();
+//                Toast.makeText(MainActivity.this, "Total Samples:" + totalSamples, Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -128,8 +141,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
-
         tvUserId = findViewById(R.id.tv_user_id);
+        if (currentUser.isEmpty()) tvUserId.setText("none");
+        else tvUserId.setText(currentUser);
         tvSampleWords = findViewById(R.id.tv_sample_words);
         outputAdapter = new OutputAdapter(outputs);
         rvOutput = findViewById(R.id.rv_output);
@@ -157,6 +171,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         alert = new AlertDialog.Builder(this)
                 .setView(R.layout.dialog_add_user)
                 .create();
+    }
+
+
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.e("Asif", "onStop() called ...");
+        session.setLastWordPosition(current);
     }
 
     @Override
@@ -227,6 +250,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void saveDataToFirebase() {
+        progressBar.setVisibility(View.VISIBLE);
         final Sample sample = new Sample();
 
         byte[] imgData = saveBitMap(dv);
@@ -247,6 +271,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }).addOnCompleteListener(new OnCompleteListener<Uri>() {
         @Override
         public void onComplete(@NonNull Task<Uri> task) {
+            progressBar.setVisibility(View.INVISIBLE);
                 if (task.isSuccessful()) {
                     Uri imgUri = task.getResult();
                     Log.e("asif-url", imgUri.toString());
@@ -256,7 +281,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     sample.setWord(wordList.get(current));
                     sample.setWordId(current);
                     sample.setUserId(currentUser);
-                    sample.setDeviceId(getUniqueIMEIId());
+                    sample.setDeviceId(deviceId);
+                    sample.setImageUrl(imgUri.toString());
 
                     SampleData data = new SampleData();
 
@@ -495,6 +521,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     else {
                         currentUser = userId;
                         tvUserId.setText(currentUser);
+                        session.createUserSession(currentUser);
+                        current = 0;
+                        tvSampleWords.setText(wordList.get(current));
                         alert.dismiss();
                     }
                 }
@@ -531,6 +560,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     if (isExists) {
                         currentUser = userId;
                         tvUserId.setText(currentUser);
+                        session.createUserSession(currentUser);
+                        current = 0;
+                        tvSampleWords.setText(wordList.get(current));
                         alert.dismiss();
                     }
                     else {
