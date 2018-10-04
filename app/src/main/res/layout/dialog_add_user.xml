@@ -25,6 +25,8 @@
         android:layout_marginTop="15dp"
         android:layout_marginRight="10dp"
         android:layout_marginBottom="15dp"
+        android:inputType="text"
+        android:imeOptions="actionDone"
         android:textColor="@android:color/black" />
 
     <LinearLayout

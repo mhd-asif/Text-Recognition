@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Environment;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
@@ -33,7 +34,10 @@ import com.dds.textrecognition.Model.GoogleApiResult;
 import com.dds.textrecognition.Model.Request;
 import com.dds.textrecognition.Model.Sample;
 import com.dds.textrecognition.Model.SampleData;
+import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -41,6 +45,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.google.gson.Gson;
 
 import org.json.JSONArray;
@@ -65,14 +72,16 @@ import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     FirebaseDatabase firebaseDatabase;
+    FirebaseStorage firebaseStorage;
     DatabaseReference dbRef;
+    StorageReference storageRef;
     List<Sample> samples = new ArrayList<>();
     Request request;
 
     DrawingView dv;
     RelativeLayout rlDrawingView;
     AutoCompleteTextView etUserId;
-    Button btnOutput, btnSave, btnShow, btnPrev, btnNext, btnAddUser, btnDialogAdd, btnDialogSet, btnDialogCancel;
+    Button btnOutput, btnPrev, btnNext, btnAddUser, btnDialogAdd, btnDialogSet, btnDialogCancel;
     TextView tvSampleWords, tvUserId;
 
     List<String> wordList = new ArrayList<>();
@@ -102,11 +111,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         currentUser = "";
         service = RetrofitHelper.getRetrofitService();
         firebaseDatabase = FirebaseDatabase.getInstance();
+        firebaseStorage = FirebaseStorage.getInstance();
         dbRef = firebaseDatabase.getReference();
+        storageRef = firebaseStorage.getReference();
+
         dbRef.child("samples").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 totalSamples = dataSnapshot.getChildrenCount();
+                Toast.makeText(MainActivity.this, "Total Samples:" + totalSamples, Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -114,6 +127,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             }
         });
+
 
         tvUserId = findViewById(R.id.tv_user_id);
         tvSampleWords = findViewById(R.id.tv_sample_words);
@@ -124,10 +138,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         rvOutput.setAdapter(outputAdapter);
 
         rlDrawingView = findViewById(R.id.rl_canvas);
-        btnSave = findViewById(R.id.btn_save_data);
-        btnSave.setOnClickListener(this);
-        btnShow = findViewById(R.id.btn_show_data);
-        btnShow.setOnClickListener(this);
         btnOutput = findViewById(R.id.btn_output);
         btnOutput.setOnClickListener(this);
         btnPrev = findViewById(R.id.btn_prev);
@@ -163,17 +173,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 openNewUserWindow();
                 break;
 
-            case R.id.btn_save_data:
-                if (currentUser.isEmpty())
-                    Toast.makeText(this, "Please set your User ID!", Toast.LENGTH_SHORT).show();
-                else saveDataToFirebase();
-                break;
-
-            case R.id.btn_show_data:
-                Intent intentShowData = new Intent(this, ShowDataActivity.class);
-                startActivity(intentShowData);
-                break;
-
             case R.id.btn_prev:
                 if (current > 0) {
                     outputs.clear();
@@ -185,12 +184,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
 
             case R.id.btn_next:
-                if (current < (totalWords-1)) {
-                    outputs.clear();
-                    outputAdapter.notifyDataSetChanged();
-                    dv.clearDraw();
-                    current++;
-                    if ((word = wordList.get(current)) != null) tvSampleWords.setText(word);
+                if (currentUser.isEmpty())
+                    Toast.makeText(this, "Please set your User ID to save your data!", Toast.LENGTH_SHORT).show();
+                else {
+                    if (outputs.isEmpty()) {
+                        if (current < (totalWords-1)) {
+                            outputs.clear();
+                            outputAdapter.notifyDataSetChanged();
+                            dv.clearDraw();
+                            current++;
+                            if ((word = wordList.get(current)) != null) tvSampleWords.setText(word);
+                        }
+                    }
+                    else saveDataToFirebase();
                 }
                 break;
 
@@ -221,44 +227,74 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void saveDataToFirebase() {
-        Sample sample = new Sample();
+        final Sample sample = new Sample();
 
-        String base64ImageString = saveBitMap(MainActivity.this, dv);
-        if (base64ImageString != null) {
-            sample.setImageUrl(base64ImageString);
-            Toast.makeText(this, "Your drawing has been saved", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(this, "Sorry! There was a problem saving your drawing", Toast.LENGTH_SHORT).show();
-        }
+        byte[] imgData = saveBitMap(dv);
+        UploadTask uploadTask = storageRef.child("sample_" + totalSamples + ".jpg").putBytes(imgData);
 
-        sample.setSampleId(totalSamples);
-        sample.setWord(wordList.get(current));
-        sample.setWordId(current);
-        sample.setUserId(currentUser);
-        sample.setDeviceId(getUniqueIMEIId());
-
-        SampleData data = new SampleData();
-
-        if (request != null) data.setRequest(request);
-
-        GoogleApiResult googleApiResult = new GoogleApiResult();
-        googleApiResult.setOutput(outputs);
-        googleApiResult.setStatus("SUCCESS");
-        data.setResult(googleApiResult);
-        sample.setData(data);
-
-        Map<String, Object> mapSample = new HashMap<>();
-        mapSample.put("" + totalSamples, sample);
-
-        dbRef.child("samples").updateChildren(mapSample).addOnCompleteListener(new OnCompleteListener<Void>() {
+        Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
             @Override
-            public void onComplete(@NonNull Task<Void> task) {
+            public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                if (!task.isSuccessful()) throw task.getException();
+                return storageRef.child("sample_" + totalSamples + ".jpg").getDownloadUrl();
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.e("asif-upload", "Upload Error: " + e.getMessage());
+                Toast.makeText(MainActivity.this, "Sorry! There was a problem saving your drawing", Toast.LENGTH_SHORT).show();
+            }
+        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+        @Override
+        public void onComplete(@NonNull Task<Uri> task) {
                 if (task.isSuccessful()) {
-                    Toast.makeText(MainActivity.this, "Your data has been uploaded to Firebase", Toast.LENGTH_SHORT).show();
+                    Uri imgUri = task.getResult();
+                    Log.e("asif-url", imgUri.toString());
+                    Toast.makeText(MainActivity.this, "Your drawing has been saved", Toast.LENGTH_SHORT).show();
+
+                    sample.setSampleId(totalSamples);
+                    sample.setWord(wordList.get(current));
+                    sample.setWordId(current);
+                    sample.setUserId(currentUser);
+                    sample.setDeviceId(getUniqueIMEIId());
+
+                    SampleData data = new SampleData();
+
+                    if (request != null) data.setRequest(request);
+
+                    GoogleApiResult googleApiResult = new GoogleApiResult();
+                    googleApiResult.setOutput(outputs);
+                    googleApiResult.setStatus("SUCCESS");
+                    data.setResult(googleApiResult);
+                    sample.setData(data);
+
+                    Map<String, Object> mapSample = new HashMap<>();
+                    mapSample.put("" + totalSamples, sample);
+
+                    dbRef.child("samples").updateChildren(mapSample).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (task.isSuccessful()) {
+                                Toast.makeText(MainActivity.this, "Your data has been uploaded to Firebase", Toast.LENGTH_SHORT).show();
+
+                                String word;
+                                if (current < (totalWords - 1)) {
+                                    outputs.clear();
+                                    outputAdapter.notifyDataSetChanged();
+                                    dv.clearDraw();
+                                    current++;
+                                    if ((word = wordList.get(current)) != null)
+                                        tvSampleWords.setText(word);
+                                }
+                            } else {
+                                Toast.makeText(MainActivity.this, "Sorry! Your data could not be saved. Please try again", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
                 }
+                /***************************/
             }
         });
-
 
     }
 
@@ -341,17 +377,37 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return returnedBitmap;
     }
 
-    private String saveBitMap(Context context, View drawView){
-        String base64ImageString;
-        Bitmap bitmap =getBitmapFromView(drawView);
+    private byte[] saveBitMap(View drawView) {
+        Bitmap bitmap = getBitmapFromView(drawView);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] data = baos.toByteArray();
 
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
-        byte[] byteArray = byteArrayOutputStream.toByteArray();
+        return data;
+    }
 
-        base64ImageString = Base64.encodeToString(byteArray, Base64.DEFAULT);
-
-        return base64ImageString;
+    private File saveBitMapAsFile(View drawView){
+        File pictureFileDir = new File(Environment.getExternalStorageDirectory(),"Logicchip");
+        if (!pictureFileDir.exists()) {
+            boolean isDirectoryCreated = pictureFileDir.mkdirs();
+            if(!isDirectoryCreated)
+                Log.i("TAG", "Can't create directory to save the image");
+            return null;
+        }
+        String filename = pictureFileDir.getPath() +File.separator+ System.currentTimeMillis()+".jpg";
+        File pictureFile = new File(filename);
+        Bitmap bitmap = getBitmapFromView(drawView);
+        try {
+            pictureFile.createNewFile();
+            FileOutputStream oStream = new FileOutputStream(pictureFile);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, oStream);
+            oStream.flush();
+            oStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.i("TAG", "There was an issue saving the image.");
+        }
+        return pictureFile;
     }
 
     private void createUserId () {

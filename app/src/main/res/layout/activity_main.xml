@@ -10,18 +10,28 @@
     <LinearLayout
         android:id="@+id/layout_top"
         android:layout_width="match_parent"
-        android:layout_height="70dp"
+        android:layout_height="50dp"
         android:layout_marginLeft="5dp"
+        android:layout_marginTop="5dp"
         android:layout_marginRight="5dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:weightSum="4">
+        android:weightSum="6">
+
+        <Button
+            android:id="@+id/btn_set_user"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="10dp"
+            android:layout_weight="1"
+            android:background="@android:color/holo_red_light"
+            android:text="Set User ID" />
 
         <Button
             android:id="@+id/btn_prev"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
             android:layout_weight="1"
             android:background="@android:color/holo_red_light"
             android:text="PREV" />
@@ -30,10 +40,10 @@
             android:id="@+id/tv_sample_words"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:textColor="@android:color/black"
+            android:layout_weight="2"
             android:gravity="center"
-            android:textSize="36sp"
-            android:layout_weight="2" />
+            android:textColor="@android:color/black"
+            android:textSize="36sp" />
 
         <Button
             android:id="@+id/btn_next"
@@ -42,6 +52,16 @@
             android:layout_weight="1"
             android:background="@android:color/holo_red_light"
             android:text="Next" />
+
+        <Button
+            android:id="@+id/btn_output"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="5dp"
+            android:layout_weight="1"
+            android:background="@android:color/holo_red_light"
+            android:text="Show Output" />
 
     </LinearLayout>
 
@@ -63,73 +83,13 @@
     <RelativeLayout
         android:id="@+id/rl_output"
         android:layout_width="match_parent"
-        android:layout_height="150dp"
+        android:layout_height="80dp"
         android:layout_alignParentBottom="true">
-
-        <LinearLayout
-            android:id="@+id/layout_buttons"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:orientation="horizontal"
-            android:weightSum="4">
-
-            <Button
-                android:id="@+id/btn_output"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="5dp"
-                android:layout_weight="1"
-                android:background="@android:color/holo_red_light"
-                android:paddingLeft="5dp"
-                android:paddingRight="5dp"
-                android:text="Show Output" />
-
-            <Button
-                android:id="@+id/btn_show_data"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
-                android:layout_weight="1"
-                android:background="@android:color/holo_red_light"
-                android:paddingLeft="5dp"
-                android:paddingRight="5dp"
-                android:text="Show Data" />
-
-            <Button
-                android:id="@+id/btn_save_data"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
-                android:layout_weight="1"
-                android:background="@android:color/holo_red_light"
-                android:paddingLeft="5dp"
-                android:paddingRight="5dp"
-                android:text="Save Data" />
-
-            <Button
-                android:id="@+id/btn_set_user"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="10dp"
-                android:layout_weight="1"
-                android:background="@android:color/holo_red_light"
-                android:paddingLeft="5dp"
-                android:paddingRight="5dp"
-                android:text="Set User ID" />
-
-
-        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/layout_user_info"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/layout_buttons">
+            android:layout_height="wrap_content" >
 
             <TextView
                 android:layout_width="wrap_content"
@@ -155,7 +115,7 @@
             android:layout_height="match_parent"
             android:layout_below="@+id/layout_user_info"
             android:layout_alignParentLeft="true"
-            android:layout_marginBottom="10dp" />
+            android:layout_marginBottom="5dp" />
     </RelativeLayout>
 
 </RelativeLayout>
