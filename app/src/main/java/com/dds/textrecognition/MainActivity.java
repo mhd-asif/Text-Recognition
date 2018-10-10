@@ -132,7 +132,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 totalSamples = dataSnapshot.getChildrenCount();
-//                Toast.makeText(MainActivity.this, "Total Samples:" + totalSamples, Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "Total Samples:" + totalSamples, Toast.LENGTH_SHORT).show();
             }
 
             @Override
