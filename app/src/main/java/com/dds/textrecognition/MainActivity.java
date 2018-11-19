@@ -121,18 +121,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             current = 0;
             currentUser = "";
         }
+
+
+
         deviceId = getUniqueIMEIId();
         service = RetrofitHelper.getRetrofitService();
         firebaseDatabase = FirebaseDatabase.getInstance();
         firebaseStorage = FirebaseStorage.getInstance();
-        dbRef = firebaseDatabase.getReference();
+        dbRef = firebaseDatabase.getReference("samples2");
         storageRef = firebaseStorage.getReference();
 
-        dbRef.child("samples").addValueEventListener(new ValueEventListener() {
+        dbRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 totalSamples = dataSnapshot.getChildrenCount();
-                Toast.makeText(MainActivity.this, "Total Samples:" + totalSamples, Toast.LENGTH_SHORT).show();
+//                Toast.makeText(MainActivity.this, "Total Samples:" + totalSamples, Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -164,7 +167,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         dv = new DrawingView(this);
         rlDrawingView.addView(dv);
 
-        wordList = readFile();
+//        wordList = readFile("WordList.txt");
+        wordList = readMedicalCorpusFile("MedicalWordList.txt");
         totalWords = wordList.size();
         tvSampleWords.setText(wordList.get(current));
 
@@ -189,7 +193,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         switch (id) {
             case R.id.btn_output:
-                viewInkData();
+                if (NetworkConnectionHelper.isConnected(this)) {
+                    viewInkData();
+                }
+                else {
+                    Toast.makeText(this, "Sorry! No Internet Connection.", Toast.LENGTH_SHORT).show();
+                }
                 break;
 
             case R.id.btn_set_user:
@@ -254,13 +263,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         final Sample sample = new Sample();
 
         byte[] imgData = saveBitMap(dv);
-        UploadTask uploadTask = storageRef.child("sample_" + totalSamples + ".jpg").putBytes(imgData);
+        UploadTask uploadTask = storageRef.child("sample2_" + totalSamples + ".jpg").putBytes(imgData);
 
         Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
             @Override
             public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
                 if (!task.isSuccessful()) throw task.getException();
-                return storageRef.child("sample_" + totalSamples + ".jpg").getDownloadUrl();
+                return storageRef.child("sample2_" + totalSamples + ".jpg").getDownloadUrl();
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -297,7 +306,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Map<String, Object> mapSample = new HashMap<>();
                     mapSample.put("" + totalSamples, sample);
 
-                    dbRef.child("samples").updateChildren(mapSample).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    dbRef.updateChildren(mapSample).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
@@ -364,12 +373,31 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
-    private List<String> readFile() {
+    private List<String> readFile(String file) {
         AssetManager assetManager = getAssets();
         List<String> words = new ArrayList<>();
 
         try {
-            InputStream is = assetManager.open("wordlist.txt");
+            InputStream is = assetManager.open(file);
+            BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+            String line;
+
+            while ((line = br.readLine()) != null) {
+                words.add(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return words;
+    }
+
+    private List<String> readMedicalCorpusFile(String file) {
+        AssetManager assetManager = getAssets();
+        List<String> words = new ArrayList<>();
+
+        try {
+            InputStream is = assetManager.open(file);
             BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
             String line;
 
@@ -440,12 +468,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         max = 0;
         if (etUserId != null) etUserId.setText("");
 
-        Log.e("asif-user", "Total Samples: " + totalSamples);
+//        Log.e("asif-user", "Total Samples: " + totalSamples);
         if (totalSamples == 0) {
             if (etUserId != null) etUserId.append("User_" + max);
         }
         else {
-            DatabaseReference refSamples = dbRef.child("samples");
+            DatabaseReference refSamples = dbRef;
             refSamples.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -506,7 +534,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Toast.makeText(this, "Please give a User ID!", Toast.LENGTH_SHORT).show();
         }
         else {
-            DatabaseReference refSamples = dbRef.child("samples");
+            DatabaseReference refSamples = dbRef;
             refSamples.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -523,6 +551,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         tvUserId.setText(currentUser);
                         session.createUserSession(currentUser);
                         current = 0;
+                        if (currentUser.equals("shepon")) current = 2067;
                         tvSampleWords.setText(wordList.get(current));
                         alert.dismiss();
                     }
@@ -546,7 +575,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Toast.makeText(this, "Please give a User ID!", Toast.LENGTH_SHORT).show();
         }
         else {
-            DatabaseReference refSamples = dbRef.child("samples");
+            DatabaseReference refSamples = dbRef;
             refSamples.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {

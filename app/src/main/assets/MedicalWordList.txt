@@ -1,0 +1,477 @@
+﻿426,Ostocal D
+381,Maxpro
+376,Ranitid
+367,Napa
+322,Ferocit
+285,Neuro B
+278,Comet
+261,Omidon
+261,Multivit plus
+261,Calbo D
+255,Amdocal
+226,Neoceptin
+223,Tryptin
+215,Rivotril
+213,Frenxit
+206,Laxyl
+181,Indever
+178,Seclo
+176,Algin
+173,Xionil
+163,Ciprocin
+161,Ace
+160,Renova
+159,Esonix
+159,Bopam
+155,Entacyd plus
+148,Avolac
+140,Omenix
+137,Norry
+136,Metfo
+134,seclo
+131,Bextram Gold
+126,Naprox
+122,Losectil
+121,Omep
+120,Napa Extend
+120,Flexi
+116,Myolax
+116,Beklo
+115,Pase
+110,A
+102,Osartil
+100,Atova
+97,Filmet
+97,Angilock
+96,Reumacap
+96,Naprosyn
+96,Bextrum silver
+93,Metro
+93,Acical M
+91,Ipec plus
+90,ORS
+90,Joinix plus
+83,Rabe
+82,Sergel
+82,Pantonix
+81,Comprid
+77,Vitabion
+77,Fenadin
+75,Zif
+75,Loratin
+75,Calbon
+73,Fillwel silver
+72,Clonatril
+71,Xinc
+71,Betaloc
+70,Filwel gold
+70,Deslor
+70,Alatrol
+69,Viset
+69,Tenoren
+69,Aristo Gold
+68,Acical D
+67,Tenoloc
+67,Ramoril
+67,Cef
+66,Pantid
+65,Secrin
+65,Neobion
+65,Flugal
+64,Aristovit
+61,Indomet
+60,Rex
+58,Tufnil
+58,Esotid
+57,Monas
+56,Gynomix VT
+56,Flexibac
+55,Proviten A
+55,Finix
+54,Angilock 50 Plus
+53,Normens
+53,Amaryl
+52,Pregaba
+51,Fixocard
+51,Camlodin
+51,Betanol
+50,Ecosprin
+49,Voltalin
+49,Uromax
+47,Ometid
+47,Napa Extra
+46,Oradin
+46,Montair
+43,Contine
+42,vertina plus
+42,Zimax
+42,Clofenac
+41,Furocef
+41,Amdocal 50 Plus
+40,Nitromint SR
+38,Renxit
+38,Norium
+38,Etorix
+37,Deflux
+37,Amdocal 25 plus
+37,Ambrox
+36,Fexo
+34,Domiren
+34,Ceevit
+33,Becozin
+32,Neurobest
+32,Napadol
+32,E
+31,Ripril
+31,Ramace
+31,Nidocard
+31,Magfin
+31,Fixocard (5/50)
+31,Feofol CI
+30,Secnid DS
+30,Ranidin
+30,Cinaron
+29,Glucozid
+29,Econate
+29,Alben DS
+28,Tenocab
+28,Ostocal
+28,Moodon
+27,zinc B
+27,Tramal
+27,Proviten Silver
+27,Neso
+26,Kilmax
+26,Dimerol
+25,Paricel
+25,Exium
+25,AtoZ
+25,Amlopin
+24,Febustat
+24,Calcin
+24,Bukof
+24,Angilock 25 Plus
+23,Vidalin Gold
+23,Calboplex
+23,BUTAPEN
+22,Calvimax
+21,Rutix
+21,Maganta Plus
+21,Losan
+21,Levoxin
+21,Ferocit Z
+20,meverin
+20,Zolium
+19,Scabex
+19,Norzin
+19,Losart 50 Plus
+18,Sucomet
+18,Sedil
+18,Omastin
+17,antazol
+17,Tofen
+17,Beuflox
+17,Amelin
+17,Acitrin
+16,Nintoin
+16,Ciprox
+16,Cipro
+16,Azmasol HFA Inhaler
+16,Anustat
+15,Tiginor
+15,Nortrin
+15,Mave
+15,FOLISON
+15,Clob
+15,Beclo
+14,Vasco
+14,Probitor
+14,Mucolet
+14,Inflam
+14,Emistat
+14,Cerox CV
+14,Bizoran
+14,Bislol
+13,ultrafen
+13,Nitrocard
+13,Neofloxin
+13,Mervan
+13,Fusid
+13,Esogut
+13,Azithrocin
+12,Ventolin
+12,Relentus
+12,Prosan
+12,Metryl
+12,Histacin
+12,Fimoxyclav
+12,Cefotil
+12,Apsol oral paste
+12,Anaflex
+12,Afrin
+12,Ace plus
+11,microral gel
+11,Rosuva
+11,Ramipro
+11,Naprosyn plus
+11,Mucolyte
+11,Esloric
+11,Camlodin 50 plus
+10,Secnid
+10,Prosan 50 HZ
+10,Ostogen
+10,Nordette 28
+10,Nameso
+10,MOM
+10,Lasix
+10,Angitor
+10,Acliz
+9,Zinc
+9,Torax
+9,Sultolin Inhaler
+9,Rostril
+9,Riboson
+9,Rabeca
+9,PREGABA
+9,Ovulet
+9,Neurocare
+9,Momvit plus
+9,Losart 25 Plus
+9,Dormicum
+9,Diaryl
+9,Consucon
+8,normens
+8,fossical D
+8,Zymet
+8,Zox
+8,Urodart
+8,Rabezol
+8,Nitromint
+8,Nidipine SR
+8,Lipril
+8,Gynokmix VT
+8,Frulac
+8,Dimerol MR
+8,Comprid XR
+8,Clopid
+8,Amlotab
+8,Ambrox SR
+7,Zithrox
+7,Revert
+7,Perkinil
+7,Normanol
+7,Moxaclave
+7,Montene
+7,Metaloc
+7,Jointec Max
+7,Flixonase Nasal Spray
+7,Equra ointment
+7,Caldil plus
+7,Beclomin 100 Inhaler
+7,Azin
+7,Anadol
+7,Adovas
+6,whitfield
+6,omastin ointment
+6,Vergon
+6,Ucol
+6,Tamen X
+6,Ritch
+6,Pep 20
+6,Pegalin
+6,Osartil 50 Plus
+6,Oramet
+6,Melixol
+6,Magsulf syp
+6,HPR
+6,Glucomet
+6,Gaba
+6,Flugal ointment
+6,Fexofen
+6,Beovit
+5,solas
+5,X trum
+5,Stemetil
+5,Quinox
+5,Opton
+5,Onium
+5,Omlesan
+5,Omex
+5,Nebanol plus
+5,Multivit
+5,LAXYL
+5,Fluclox
+5,Feburen
+5,Evo
+5,Esoral
+5,Edeloss
+5,Camlodin 25 plus
+5,Calbo
+5,Bisocor
+5,Bigmet
+5,Avil Rtd.
+5,Alcet
+5,
+4,coracal D
+4,X
+4,Vidalin Plus
+4,Unicontine
+4,Sulflu
+4,Select plus
+4,Rezulin
+4,Omlesan 20 Plus
+4,Novelta
+4,Milk of Magnesia
+4,Maxsulin 30/70
+4,Glucomet 500XR
+4,Flucloxin
+4,Cortan
+4,Clobate ointment
+4,Cefix
+4,Bexitrol
+4,Alben
+4,Adiponil
+4,ACE
+3,curin
+3,aclovet ointment
+3,Traxyl
+3,Pyrenol
+3,Progesic
+3,Power B
+3,Parapyrol
+3,Oxycone MS
+3,Nifin
+3,Mixterd 30 HM 100
+3,Iriban SR
+3,Iprasol Inhaler HFA
+3,Fimoxyl
+3,Filwel kids
+3,FEXO 120MG TAB
+3,Exovate
+3,EC
+3,Dysmen
+3,Doxicab
+3,Dermovate
+3,Daflon
+3,Ceftron
+3,Bextrum Gold
+3,Barif
+3,Artica
+3,Acepril
+2,salbu
+2,norzine
+2,Vomitop
+2,Vanprox
+2,V
+2,Tamen
+2,Ritch Plus
+2,Reelife
+2,Purisal
+2,Pizofen
+2,Pawar
+2,Nidipine
+2,Necter
+2,Metfar
+2,Losucon
+2,Kenalog oro
+2,KY jelly
+2,Icy Cool Max
+2,Humulin Penfill
+2,Gynaepro VT
+2,Glycerine
+2,Glucomet750XR
+2,Gastralfet
+2,Fungidal
+2,Flamex
+2,Flacol
+2,Febus
+2,FEXO 180 MG TAB
+2,Endeavour
+2,Encorate
+2,Ecotrim
+2,Duloxen
+2,Diapro
+2,Consucon MR
+2,Cardizem
+2,Bisoprol
+2,Angiten
+2,Actrapid
+1,xamic
+1,vista
+1,vildus
+1,skinalar
+1,purisal
+1,prodep
+1,pen
+1,nomopil
+1,metfoXR
+1,laxena
+1,koolmint cream
+1,joinix
+1,Valex
+1,Unilin CR
+1,Ubilon
+1,Tritin
+1,Tos
+1,Tinium
+1,Ternilla
+1,Telabid 1
+1,Spotclen Plus
+1,Seasonix
+1,Salflu
+1,Ridon
+1,Presonil
+1,PhylopenDS
+1,Optimox eye drop
+1,Opladin eye drop
+1,Oclazid
+1,OVESTIN
+1,Nobesit
+1,Nifecap
+1,Neuro
+1,Natrilix SR
+1,NAC
+1,Micoral
+1,Metsa
+1,Mecol
+1,Maxsulin 50/50
+1,Maxima
+1,Marlox plus
+1,Levasal
+1,Larb
+1,Intimate
+1,Inclox
+1,Hemorif
+1,HTZ
+1,Gestrenol
+1,Gelora Oral Gel
+1,Fusid plus
+1,Furex
+1,Flumetol
+1,Flatameal ds
+1,Flamyd
+1,Feofol
+1,Facid HC
+1,Esita
+1,Erian
+1,Erdon eye drop
+1,Enaril
+1,Edeloss Plus
+1,Doxicap
+1,Disys
+1,Dimecron
+1,Dilentin
+1,Dermasol N
+1,Coversyl
+1,Cotrim
+1,Clognil
+1,Clofenac Gel
+1,Catapress 0.1mg
+1,Carvista
+1,Caldical
+1,Cadnyl 4
+1,CVnor
+1,Betnovate
+1,Aspirin
+1,Arian
+1,Anapril

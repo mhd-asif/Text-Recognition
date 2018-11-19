@@ -101,7 +101,6 @@ public class DrawingView extends View {
     }
 
     public void clearDraw () {
-        saveAsPicture();
         mBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         mCanvas = new Canvas(mBitmap);
         mPath = new Path();
@@ -144,10 +143,5 @@ public class DrawingView extends View {
         }
         return true;
     }
-
-    private void saveAsPicture () {
-
-    }
-
 
 }
