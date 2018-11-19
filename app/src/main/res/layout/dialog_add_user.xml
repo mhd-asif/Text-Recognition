@@ -5,7 +5,7 @@
     android:background="@android:color/white">
 
     <TextView
-        android:id="@+id/title"
+        android:id="@+id/tv_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
@@ -20,13 +20,27 @@
         android:id="@+id/et_user_id"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/title"
+        android:layout_below="@id/tv_title"
         android:layout_marginLeft="10dp"
         android:layout_marginTop="15dp"
         android:layout_marginRight="10dp"
         android:layout_marginBottom="15dp"
         android:inputType="text"
         android:imeOptions="actionDone"
+        android:textColor="@android:color/black" />
+
+    <AutoCompleteTextView
+        android:id="@+id/et_password"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_title"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginBottom="15dp"
+        android:inputType="textPassword"
+        android:imeOptions="actionDone"
+        android:visibility="invisible"
         android:textColor="@android:color/black" />
 
     <LinearLayout

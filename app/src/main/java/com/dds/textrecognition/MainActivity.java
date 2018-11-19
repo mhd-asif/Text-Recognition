@@ -35,6 +35,7 @@ import com.dds.textrecognition.Model.GoogleApiResult;
 import com.dds.textrecognition.Model.Request;
 import com.dds.textrecognition.Model.Sample;
 import com.dds.textrecognition.Model.SampleData;
+import com.dds.textrecognition.Model.User;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -72,18 +73,21 @@ import retrofit2.Response;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+    private static final int EVENT_ADD_NEW_USER = 1;
+    private static final int EVENT_SET_EXISTING_USER = 2;
+    private static final int EVENT_SET_EXISTING_ADMIN= 3;
     FirebaseDatabase firebaseDatabase;
     FirebaseStorage firebaseStorage;
-    DatabaseReference dbRef;
+    DatabaseReference sampleRef, userRef;
     StorageReference storageRef;
     List<Sample> samples = new ArrayList<>();
     Request request;
 
     DrawingView dv;
     RelativeLayout rlDrawingView;
-    AutoCompleteTextView etUserId;
+    AutoCompleteTextView etUserId, etPassword;
     Button btnOutput, btnPrev, btnNext, btnAddUser, btnDialogAdd, btnDialogSet, btnDialogCancel;
-    TextView tvSampleWords, tvUserId;
+    TextView tvSampleWords, tvUserId, tvDialogTitle;
 
     List<String> wordList = new ArrayList<>();
 
@@ -95,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     RetrofitService service;
 
     int current, totalWords;
-    long totalSamples;
+    long totalSamples, totalUsers;
     String currentUser;
 
     int max;
@@ -105,11 +109,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     SessionManager session;
     ProgressBar progressBar;
 
+    boolean userPromptAdminType = false;
+    String passwordText;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
         Log.e("Asif", "onCreate() called ...");
+        setContentView(R.layout.activity_main);
 
         progressBar = findViewById(R.id.progress_bar);
         session = new SessionManager(this);
@@ -122,20 +129,32 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             currentUser = "";
         }
 
-
-
         deviceId = getUniqueIMEIId();
         service = RetrofitHelper.getRetrofitService();
         firebaseDatabase = FirebaseDatabase.getInstance();
         firebaseStorage = FirebaseStorage.getInstance();
-        dbRef = firebaseDatabase.getReference("samples2");
-        storageRef = firebaseStorage.getReference();
+        sampleRef = firebaseDatabase.getReference("medical-samples");
+        userRef = firebaseDatabase.getReference("users");
+        storageRef = firebaseStorage.getReference("medical");
 
-        dbRef.addValueEventListener(new ValueEventListener() {
+        sampleRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 totalSamples = dataSnapshot.getChildrenCount();
 //                Toast.makeText(MainActivity.this, "Total Samples:" + totalSamples, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        userRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                totalUsers = dataSnapshot.getChildrenCount();
+                Toast.makeText(MainActivity.this, "Total Users:" + totalUsers, Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -167,23 +186,46 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         dv = new DrawingView(this);
         rlDrawingView.addView(dv);
 
-//        wordList = readFile("WordList.txt");
-        wordList = readMedicalCorpusFile("MedicalWordList.txt");
-        totalWords = wordList.size();
-        tvSampleWords.setText(wordList.get(current));
-
         alert = new AlertDialog.Builder(this)
                 .setView(R.layout.dialog_add_user)
                 .create();
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.e("Asif", "onStart() called ...");
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.e("Asif", "onResume() called ...");
+
+//        wordList = readFile("WordList.txt");
+        wordList = readMedicalCorpusFile("MedicalWordList.txt");
+        totalWords = wordList.size();
+
+        updateSamplePhrase();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.e("Asif", "onPause() called ...");
+    }
 
     @Override
     protected void onStop() {
         super.onStop();
         Log.e("Asif", "onStop() called ...");
         session.setLastWordPosition(current);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.e("Asif", "onDestroy() called ...");
     }
 
     @Override
@@ -195,8 +237,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.btn_output:
                 if (NetworkConnectionHelper.isConnected(this)) {
                     viewInkData();
-                }
-                else {
+                } else {
                     Toast.makeText(this, "Sorry! No Internet Connection.", Toast.LENGTH_SHORT).show();
                 }
                 break;
@@ -220,24 +261,53 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Toast.makeText(this, "Please set your User ID to save your data!", Toast.LENGTH_SHORT).show();
                 else {
                     if (outputs.isEmpty()) {
-                        if (current < (totalWords-1)) {
+                        if (current < (totalWords - 1)) {
                             outputs.clear();
                             outputAdapter.notifyDataSetChanged();
                             dv.clearDraw();
                             current++;
                             if ((word = wordList.get(current)) != null) tvSampleWords.setText(word);
                         }
-                    }
-                    else saveDataToFirebase();
+                    } else saveDataToFirebase();
                 }
                 break;
 
             case R.id.btn_dialog_add:
-                addNewUser();
+                if (NetworkConnectionHelper.isConnected(this)) {
+                    if (etUserId != null) {
+                        userId = etUserId.getText().toString();
+                        if (userId.equalsIgnoreCase("admin")) {
+
+                        } else if (!userId.isEmpty()) {
+                            addOrSetUser(EVENT_ADD_NEW_USER);
+                        }
+                    }
+
+                } else {
+                    Toast.makeText(this, "Sorry! No Internet Connection.", Toast.LENGTH_SHORT).show();
+                }
                 break;
 
             case R.id.btn_dialog_set:
-                setExistingUser();
+                if (NetworkConnectionHelper.isConnected(this)) {
+                    if (userPromptAdminType) {
+                        setAdmin();
+                        userPromptAdminType = false;
+                    } else {
+                        if (etUserId != null) {
+                            userId = etUserId.getText().toString();
+                            if (userId.equalsIgnoreCase("admin")) {
+                                userPromptAdminType = true;
+                                createPasswordViewForAdmin();
+                            } else if (!userId.isEmpty()) {
+                                addOrSetUser(EVENT_SET_EXISTING_USER);
+                            }
+                        }
+                    }
+                }
+                else {
+                    Toast.makeText(this, "Sorry! No Internet Connection.", Toast.LENGTH_SHORT).show();
+                }
                 break;
         }
     }
@@ -258,18 +328,44 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return drawingDataRequest;
     }
 
+    private void saveUserToFirebase(final String username, String password, int lastWordInfo) {
+        User user = new User();
+        user.setUserId(username);
+        user.setPassword(password);
+        user.setLastWordId(lastWordInfo);
+
+        Map<String, Object> mapSample = new HashMap<>();
+        mapSample.put(username, user);
+
+        userRef.updateChildren(mapSample).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    Toast.makeText(MainActivity.this, "User has been added to Firebase.", Toast.LENGTH_SHORT).show();
+                    currentUser = username;
+                    tvUserId.setText(currentUser);
+                    session.createUserSession(currentUser);
+                    current = 0;
+                    tvSampleWords.setText(wordList.get(current));
+                } else {
+                    Toast.makeText(MainActivity.this, "Sorry! User could not be saved. Please try again.", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
     private void saveDataToFirebase() {
         progressBar.setVisibility(View.VISIBLE);
         final Sample sample = new Sample();
 
         byte[] imgData = saveBitMap(dv);
-        UploadTask uploadTask = storageRef.child("sample2_" + totalSamples + ".jpg").putBytes(imgData);
+        UploadTask uploadTask = storageRef.child("medical_" + totalSamples + ".jpg").putBytes(imgData);
 
         Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
             @Override
             public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
                 if (!task.isSuccessful()) throw task.getException();
-                return storageRef.child("sample2_" + totalSamples + ".jpg").getDownloadUrl();
+                return storageRef.child("medical_" + totalSamples + ".jpg").getDownloadUrl();
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -278,9 +374,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Toast.makeText(MainActivity.this, "Sorry! There was a problem saving your drawing", Toast.LENGTH_SHORT).show();
             }
         }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-        @Override
-        public void onComplete(@NonNull Task<Uri> task) {
-            progressBar.setVisibility(View.INVISIBLE);
+            @Override
+            public void onComplete(@NonNull Task<Uri> task) {
+                progressBar.setVisibility(View.INVISIBLE);
                 if (task.isSuccessful()) {
                     Uri imgUri = task.getResult();
                     Log.e("asif-url", imgUri.toString());
@@ -306,11 +402,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Map<String, Object> mapSample = new HashMap<>();
                     mapSample.put("" + totalSamples, sample);
 
-                    dbRef.updateChildren(mapSample).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    sampleRef.updateChildren(mapSample).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
-                                Toast.makeText(MainActivity.this, "Your data has been uploaded to Firebase", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(MainActivity.this, "Your data has been uploaded to Firebase.", Toast.LENGTH_SHORT).show();
 
                                 String word;
                                 if (current < (totalWords - 1)) {
@@ -319,7 +415,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     dv.clearDraw();
                                     current++;
                                     if ((word = wordList.get(current)) != null)
-                                        tvSampleWords.setText(word);
+                                        userRef.child(currentUser).child("lastWordId").setValue(current);
+                                    tvSampleWords.setText(word);
                                 }
                             } else {
                                 Toast.makeText(MainActivity.this, "Sorry! Your data could not be saved. Please try again", Toast.LENGTH_SHORT).show();
@@ -402,6 +499,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             String line;
 
             while ((line = br.readLine()) != null) {
+                line = line.substring(line.indexOf(",") + 1);
                 words.add(line);
             }
         } catch (IOException e) {
@@ -468,18 +566,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         max = 0;
         if (etUserId != null) etUserId.setText("");
 
-//        Log.e("asif-user", "Total Samples: " + totalSamples);
-        if (totalSamples == 0) {
+        if (totalUsers == 0) {
             if (etUserId != null) etUserId.append("User_" + max);
         }
         else {
-            DatabaseReference refSamples = dbRef;
-            refSamples.addValueEventListener(new ValueEventListener() {
+            userRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     for (DataSnapshot snapshot: dataSnapshot.getChildren()) {
-                        Sample sample = snapshot.getValue(Sample.class);
-                        String userId = sample.getUserId();
+                        User user = snapshot.getValue(User.class);
+                        String userId = user.getUserId();
 
                         Log.e("asif-user", "User ID: " + userId);
                         //check user id with numbers
@@ -510,7 +606,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void openNewUserWindow() {
         alert.show();
+        tvDialogTitle = alert.findViewById(R.id.tv_title);
         etUserId = alert.findViewById(R.id.et_user_id);
+        etPassword = alert.findViewById(R.id.et_password);
         btnDialogAdd = alert.findViewById(R.id.btn_dialog_add);
         btnDialogAdd.setOnClickListener(this);
         btnDialogSet = alert.findViewById(R.id.btn_dialog_set);
@@ -519,83 +617,115 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btnDialogCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (userPromptAdminType) {
+                    removePasswordViewForUser();
+                    userPromptAdminType = false;
+                }
                 alert.dismiss();
             }
         });
         createUserId();
     }
 
-    private void addNewUser() {
-        userId = "";
-
-        if (etUserId != null) userId = etUserId.getText().toString();
-
-        if (userId.isEmpty()) {
-            Toast.makeText(this, "Please give a User ID!", Toast.LENGTH_SHORT).show();
-        }
-        else {
-            DatabaseReference refSamples = dbRef;
-            refSamples.addListenerForSingleValueEvent(new ValueEventListener() {
+    private void updateSamplePhrase() {
+        if (!currentUser.isEmpty()) {
+            userRef.child(currentUser).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    boolean isExists = false;
-                    for (DataSnapshot data : dataSnapshot.getChildren()) {
-                        Sample sample = data.getValue(Sample.class);
-                        if (sample.getUserId().equals(userId)) {
-                            isExists = true;
-                        }
-                    }
-                    if (isExists) Toast.makeText(MainActivity.this, "This user ID already exists", Toast.LENGTH_SHORT).show();
-                    else {
-                        currentUser = userId;
-                        tvUserId.setText(currentUser);
-                        session.createUserSession(currentUser);
-                        current = 0;
-                        if (currentUser.equals("shepon")) current = 2067;
-                        tvSampleWords.setText(wordList.get(current));
-                        alert.dismiss();
-                    }
+                    User user = dataSnapshot.getValue(User.class);
+                    current = user.getLastWordId();
+                    session.setLastWordPosition(current);
+                    tvSampleWords.setText(wordList.get(current));
                 }
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError databaseError) {
-                    Log.e("asif-query", "" + databaseError);
+
                 }
             });
-
         }
     }
 
-    private void setExistingUser() {
-        userId = "";
+    private void removePasswordViewForUser() {
+        etPassword.setText("");
+        etPassword.setVisibility(View.INVISIBLE);
+        etUserId.setVisibility(View.VISIBLE);
+        btnDialogAdd.setVisibility(View.VISIBLE);
+        tvDialogTitle.setText("Set User ID");
+    }
 
-        if (etUserId != null) userId = etUserId.getText().toString();
+    private void createPasswordViewForAdmin() {
+        etUserId.setVisibility(View.INVISIBLE);
+        btnDialogAdd.setVisibility(View.INVISIBLE);
+        etPassword.setVisibility(View.VISIBLE);
+        tvDialogTitle.setText("Set Password");
+    }
 
-        if (userId.isEmpty()) {
-            Toast.makeText(this, "Please give a User ID!", Toast.LENGTH_SHORT).show();
+    private void setAdmin () {
+        if (etPassword != null) {
+            passwordText = etPassword.getText().toString();
         }
-        else {
-            DatabaseReference refSamples = dbRef;
-            refSamples.addListenerForSingleValueEvent(new ValueEventListener() {
+
+        userRef.child("admin").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                User user = dataSnapshot.getValue(User.class);
+                String password = user.getPassword();
+
+                if (passwordText != null) {
+                    if (password.equals(passwordText)) {
+                        updateSamplePhrase();
+                        currentUser = userId;
+                        tvUserId.setText(currentUser);
+                        session.createUserSession(currentUser);
+                        updateSamplePhrase();
+                        removePasswordViewForUser();
+                        alert.dismiss();
+                    }
+                    else
+                        Toast.makeText(MainActivity.this, "Sorry! Your password did not match.", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+    private void addOrSetUser(final int event) {
+            userRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     boolean isExists = false;
                     for (DataSnapshot data : dataSnapshot.getChildren()) {
-                        Sample sample = data.getValue(Sample.class);
-                        if (sample.getUserId().equals(userId)) {
+                        User user = data.getValue(User.class);
+                        if (user.getUserId().equalsIgnoreCase(userId)) {
                             isExists = true;
                         }
                     }
+
                     if (isExists) {
-                        currentUser = userId;
-                        tvUserId.setText(currentUser);
-                        session.createUserSession(currentUser);
-                        current = 0;
-                        tvSampleWords.setText(wordList.get(current));
-                        alert.dismiss();
+                        if (event == EVENT_ADD_NEW_USER) {
+                            Toast.makeText(MainActivity.this, "This user ID already exists", Toast.LENGTH_SHORT).show();
+                        }
+                        else if (event == EVENT_SET_EXISTING_USER) {
+                            updateSamplePhrase();
+                            currentUser = userId;
+                            tvUserId.setText(currentUser);
+                            session.createUserSession(currentUser);
+                            updateSamplePhrase();
+                            alert.dismiss();
+                        }
                     }
                     else {
-                        Toast.makeText(MainActivity.this, "This user ID doesn't exist. Please add a new one.", Toast.LENGTH_SHORT).show();
+                        if (event == EVENT_ADD_NEW_USER) {
+                            saveUserToFirebase(userId, "", 0);
+                            alert.dismiss();
+                        }
+                        else if (event == EVENT_SET_EXISTING_USER) {
+                            Toast.makeText(MainActivity.this, "This user ID doesn't exist. Please add a new one.", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 }
 
@@ -604,7 +734,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Log.e("asif-query", "" + databaseError);
                 }
             });
-        }
     }
 
     public String getUniqueIMEIId() {
